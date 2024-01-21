@@ -13,9 +13,6 @@ import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
@@ -23,13 +20,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hc.iphone_likeclock.MainActivity.Companion.CLOCK_RADIUS
-import com.hc.iphone_likeclock.MainActivity.Companion.ITEM_HEIGHT
 import com.hc.iphone_likeclock.ui.theme.IPhoneLikeClockTheme
 import kotlin.math.PI
 import kotlin.math.asin
 import kotlin.math.cos
-import kotlin.math.sin
 import kotlin.math.sqrt
 
 class MainActivity : ComponentActivity() {
@@ -37,22 +31,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             IPhoneLikeClockTheme {
-                Clock()
+                Clock(120.dp, 50.dp)
             }
         }
-    }
-
-    companion object {
-        const val CLOCK_RADIUS = 120
-        const val ITEM_HEIGHT = 50
     }
 }
 
 @Composable
-fun Clock() {
+fun Clock(clockRadius: Dp, itemSize: Dp) {
     val listState = rememberLazyListState()
-    val layoutInfo by remember { derivedStateOf { listState.layoutInfo } }
-    val height = CLOCK_RADIUS.dp * sqrt(3f)
+    val height = clockRadius * sqrt(3f)
     Column() {
         Box(modifier = Modifier.fillMaxWidth().height(100.dp))
         LazyColumn(
@@ -68,19 +56,21 @@ fun Clock() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(
-                            if (indexInVisibleItems !in layoutInfo.visibleItemsInfo.indices)
-                                ITEM_HEIGHT.dp * cos(PI / 2.6).toFloat()
+                            if (indexInVisibleItems !in listState.layoutInfo.visibleItemsInfo.indices)
+                                itemSize * cos(PI / 2.6).toFloat()
                             else {
                                 val degree = getRotationDegree(
+                                    clockRadius,
                                     height,
-                                    layoutInfo.visibleItemsInfo[indexInVisibleItems]
+                                    listState.layoutInfo.visibleItemsInfo[indexInVisibleItems]
                                 )
-                                ITEM_HEIGHT.dp * cos(degree / 180f * PI).toFloat()
+                                itemSize * cos(degree / 180f * PI).toFloat()
                             }
                         )
                         .graphicsLayer {
                             if (indexInVisibleItems !in listState.layoutInfo.visibleItemsInfo.indices) return@graphicsLayer
                             rotationX = getRotationDegree(
+                                clockRadius,
                                 height,
                                 listState.layoutInfo.visibleItemsInfo[indexInVisibleItems]
                             )
@@ -94,11 +84,11 @@ fun Clock() {
     }
 }
 
-fun getRotationDegree(height: Dp, itemInfo: LazyListItemInfo): Float {
+fun getRotationDegree(clockRadius: Dp, height: Dp, itemInfo: LazyListItemInfo): Float {
     // itemPosition is the position of vertical center of the item
     val itemPosition = itemInfo.offset + itemInfo.size / 2
     val h = (height / 2 - itemPosition.toDp()).value
-    val r = CLOCK_RADIUS.toFloat()
+    val r = clockRadius.value
     return (asin(h / r) * 180 / PI).toFloat()
 }
 
@@ -106,7 +96,7 @@ fun getRotationDegree(height: Dp, itemInfo: LazyListItemInfo): Float {
 @Composable
 fun ClockPreview() {
     IPhoneLikeClockTheme {
-        Clock()
+        Clock(120.dp, 50.dp)
     }
 }
 
