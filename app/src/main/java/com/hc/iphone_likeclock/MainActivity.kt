@@ -4,16 +4,23 @@ import android.content.res.Resources
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -24,7 +31,7 @@ import com.hc.iphone_likeclock.ui.theme.IPhoneLikeClockTheme
 import kotlin.math.PI
 import kotlin.math.asin
 import kotlin.math.cos
-import kotlin.math.sqrt
+import kotlin.math.sin
 import kotlin.math.tan
 
 class MainActivity : ComponentActivity() {
@@ -32,8 +39,26 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             IPhoneLikeClockTheme {
-                Clock(120.dp, 50.dp, (0 .. 100).map { it.toString() }.toList())
+                IPhoneLikeClock()
             }
+        }
+    }
+}
+
+@Composable
+fun IPhoneLikeClock() {
+    val amAndPm = listOf("오전", "오후").addedEmptySpaces()
+    val hours = (1 .. 12).map { it.toString() }.toList().addedEmptySpaces()
+    val minutes = (1 .. 59).map { it.toString() }.toList().addedEmptySpaces()
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.weight(1f)) {
+            Clock(120.dp, 50.dp, amAndPm)
+        }
+        Box(modifier = Modifier.weight(1f)) {
+            Clock(120.dp, 50.dp, hours)
+        }
+        Box(modifier = Modifier.weight(1f)) {
+            Clock(120.dp, 50.dp, minutes)
         }
     }
 }
@@ -41,8 +66,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Clock(clockRadius: Dp, itemSize: Dp, items: List<String>) {
     val listState = rememberLazyListState()
-    // shows about 60 degree of clock
-    val height = clockRadius * tan(PI / 3).toFloat()
+    val height = clockRadius * sin(PI * (70.0 / 180.0)).toFloat() * 2
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
@@ -56,7 +80,7 @@ fun Clock(clockRadius: Dp, itemSize: Dp, items: List<String>) {
                     .fillMaxWidth()
                     .height(
                         if (indexInVisibleItems !in listState.layoutInfo.visibleItemsInfo.indices)
-                            itemSize * cos(PI / 2.6).toFloat()
+                            itemSize * cos(PI * (77.0 / 180.0)).toFloat()
                         else {
                             val degree = getRotationDegree(
                                 clockRadius,
@@ -73,9 +97,10 @@ fun Clock(clockRadius: Dp, itemSize: Dp, items: List<String>) {
                             height,
                             listState.layoutInfo.visibleItemsInfo[indexInVisibleItems]
                         )
-                    },
+                    }
+                    .wrapContentHeight(CenterVertically),
                 text = "${items[itemIndex]}",
-                fontSize = 20.sp,
+                fontSize = 24.sp,
                 textAlign = TextAlign.Center
             )
         }
@@ -96,6 +121,14 @@ fun ClockPreview() {
     IPhoneLikeClockTheme {
         Clock(120.dp, 50.dp, (0 .. 100).map { it.toString() }.toList())
     }
+}
+
+private fun List<String>.addedEmptySpaces(): List<String> {
+    val list = mutableListOf<String>()
+    repeat(2) { list.add("") }
+    list.addAll(this)
+    repeat(2) { list.add("") }
+    return list
 }
 
 fun Int.toDp(): Dp {
