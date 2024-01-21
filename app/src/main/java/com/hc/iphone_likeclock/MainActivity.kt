@@ -25,61 +25,59 @@ import kotlin.math.PI
 import kotlin.math.asin
 import kotlin.math.cos
 import kotlin.math.sqrt
+import kotlin.math.tan
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             IPhoneLikeClockTheme {
-                Clock(120.dp, 50.dp)
+                Clock(120.dp, 50.dp, (0 .. 100).map { it.toString() }.toList())
             }
         }
     }
 }
 
 @Composable
-fun Clock(clockRadius: Dp, itemSize: Dp) {
+fun Clock(clockRadius: Dp, itemSize: Dp, items: List<String>) {
     val listState = rememberLazyListState()
-    val height = clockRadius * sqrt(3f)
-    Column() {
-        Box(modifier = Modifier.fillMaxWidth().height(100.dp))
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                // shows about 60 degree of clock
-                .height(height),
-            state = listState
-        ) {
-            items(100) { itemIndex ->
-                val indexInVisibleItems = itemIndex - listState.firstVisibleItemIndex
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(
-                            if (indexInVisibleItems !in listState.layoutInfo.visibleItemsInfo.indices)
-                                itemSize * cos(PI / 2.6).toFloat()
-                            else {
-                                val degree = getRotationDegree(
-                                    clockRadius,
-                                    height,
-                                    listState.layoutInfo.visibleItemsInfo[indexInVisibleItems]
-                                )
-                                itemSize * cos(degree / 180f * PI).toFloat()
-                            }
-                        )
-                        .graphicsLayer {
-                            if (indexInVisibleItems !in listState.layoutInfo.visibleItemsInfo.indices) return@graphicsLayer
-                            rotationX = getRotationDegree(
+    // shows about 60 degree of clock
+    val height = clockRadius * tan(PI / 3).toFloat()
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(height),
+        state = listState
+    ) {
+        items(items.size) { itemIndex ->
+            val indexInVisibleItems = itemIndex - listState.firstVisibleItemIndex
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(
+                        if (indexInVisibleItems !in listState.layoutInfo.visibleItemsInfo.indices)
+                            itemSize * cos(PI / 2.6).toFloat()
+                        else {
+                            val degree = getRotationDegree(
                                 clockRadius,
                                 height,
                                 listState.layoutInfo.visibleItemsInfo[indexInVisibleItems]
                             )
-                        },
-                    text = "${itemIndex}",
-                    fontSize = 20.sp,
-                    textAlign = TextAlign.Center
-                )
-            }
+                            itemSize * cos(degree / 180f * PI).toFloat()
+                        }
+                    )
+                    .graphicsLayer {
+                        if (indexInVisibleItems !in listState.layoutInfo.visibleItemsInfo.indices) return@graphicsLayer
+                        rotationX = getRotationDegree(
+                            clockRadius,
+                            height,
+                            listState.layoutInfo.visibleItemsInfo[indexInVisibleItems]
+                        )
+                    },
+                text = "${items[itemIndex]}",
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
@@ -96,7 +94,7 @@ fun getRotationDegree(clockRadius: Dp, height: Dp, itemInfo: LazyListItemInfo): 
 @Composable
 fun ClockPreview() {
     IPhoneLikeClockTheme {
-        Clock(120.dp, 50.dp)
+        Clock(120.dp, 50.dp, (0 .. 100).map { it.toString() }.toList())
     }
 }
 
