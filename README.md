@@ -96,7 +96,7 @@ override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
 [분석] 1. 처음에는 LazyColumn 내부 아이템의 ``height``이 변해서 스크롤된다고 생각했음</br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;하지만 ``로그``를 찍어 보니 LazyColumn 내부 아이템의 ``height``이 변해도 __스크롤은 변하지 않았음__ </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2. LazyColumn의 ``firstVisibleItemIndex``가 반환하는 값이 변한다고 생각했음</br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;마찬가지로 ``로그``를 찍어 확인해보니 LazyColumn의 첫 아이템이 __10dp__ 까지 줄어도 __``firstVisibleItemIndex``는 변하지 않았음__.</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;마찬가지로 ``로그``를 찍어 확인해보니 LazyColumn의 첫 아이템이 __10dp__ 까지 줄어도 __``firstVisibleItemIndex``는 변하지 않았음__ </br>
 [원인] Kotlin의 삼각함수에 도(°)가 아니라 __라디안(rad)__ 단위의 숫자를 대입해야 함</br>
 [해결] __삼각함수에 대입하는 값을 라디안 단위로 변경__ 하여 대입함</br>
 
@@ -105,5 +105,5 @@ override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
 ## 2️⃣ Snapper가 제대로 동작하지 않는 문제
 [상황] LazyColumn 내부 아이템의 ``height``이 계속 변하다보니 __``Snapper`` 가 제대로 동작하지 않음__ </br>
 [분석] __Android 커뮤니티에 문의__ 한 결과, __``FlingBehavior``을 통해 ``Fling`` 관련 설정을 할 수 있다__ 는 사실을 알게 됨</br>
-[원인] ``FlingBehavior``의 구현체를 통해 __Fling 이벤트의 종료 시점에 scrollTo() 메서드를 호출함__.</br>
+[원인] ``FlingBehavior``의 구현체를 통해 __Fling 이벤트의 종료 시점에 scrollTo() 메서드를 호출함__ </br>
 [해결] __시계가 고정된 위치에 멈추게 됨__.</br>
