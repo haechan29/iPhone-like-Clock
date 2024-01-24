@@ -1,17 +1,16 @@
 # 🌟 iPhone-like Clock
-### Say Good-bye to old TimePicker!
-
 <img src="https://github.com/haechan29/iPhone-like-Clock/assets/63138511/7b52020b-0957-4111-9753-907909c44afe" width="400"/>
 
 </br>
 
-# iPhone-like Clock applies</br>
-✨ Rotation animation</br>
-✨ Snap after fling event</br>
+### ✅ Supports ``rotation animation``
+### ✅ ``Snaps`` after fling event
+### ✅ Is designed by ``Jetpack Compose``
 
 </br>
+</br>
 
-# ⚒️ How Does It Work
+# ⚒️ How Does It Work?
 ## 1️⃣ Calculate the __rotated degree__ of the item
 using the ``height`` of the clock and the ``offset`` of the item
 ```
