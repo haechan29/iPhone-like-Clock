@@ -27,7 +27,7 @@ fun getRotationDegree(layoutInfo: LazyListLayoutInfo, indexInVisibleItems: Int):
 </br>
 
 ## 2️⃣ Rotate the item by the rotated degree
-by increasing ``rotationY`` and decreasing the ``height`` of the item.
+by increasing ``rotationX`` and decreasing the ``height`` of the item.
 ```
 .graphicsLayer {
     if (!isItemVisible(layoutInfo, indexInVisibleItems)) return@graphicsLayer
