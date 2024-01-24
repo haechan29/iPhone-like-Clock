@@ -58,6 +58,7 @@ import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.asin
 import kotlin.math.cos
+import kotlin.math.pow
 import kotlin.math.sin
 
 class MainActivity : ComponentActivity() {
@@ -83,17 +84,15 @@ class MainActivity : ComponentActivity() {
 fun IPhoneLikeClock() {
     val periods = listOf("오전", "오후").addedEmptySpaces()
     val hours = (1..12).map { it.toString() }.toList().addedEmptySpaces()
-    val minutes = (1..59).map { it.toString() }.toList().addedEmptySpaces()
+    val minutes = (0..59).map { it.toString() }.toList().addedEmptySpaces()
     Box(
         modifier = Modifier
             .padding(top = 100.dp, bottom = 100.dp)
             .fillMaxWidth()
-            .height(calcClockHeight()),
-        contentAlignment = Center
+            .height(calcClockHeight()), contentAlignment = Center
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(modifier = Modifier.width(CLOCK_WIDTH.dp)) {
                 Box(modifier = Modifier.weight(1f)) {
@@ -139,8 +138,7 @@ fun BoxScope.TranslucentScreen() {
                     .padding(start = 20.dp)
                     .fillMaxSize()
                     .background(
-                        color = Color.White,
-                        shape = RoundedCornerShape(10.dp, 0.dp, 0.dp, 10.dp)
+                        color = Color.White, shape = RoundedCornerShape(10.dp, 0.dp, 0.dp, 10.dp)
                     )
             )
         }
@@ -158,8 +156,7 @@ fun BoxScope.TranslucentScreen() {
                     .padding(end = 20.dp)
                     .fillMaxSize()
                     .background(
-                        color = Color.White,
-                        shape = RoundedCornerShape(0.dp, 10.dp, 10.dp, 0.dp)
+                        color = Color.White, shape = RoundedCornerShape(0.dp, 10.dp, 10.dp, 0.dp)
                     )
             )
         }
@@ -201,30 +198,37 @@ fun RotatingText(
 ) {
     val firstVisibleItemIndex by remember { derivedStateOf { listState.firstVisibleItemIndex } }
     val indexInVisibleItems = itemIndex - firstVisibleItemIndex
-    Text(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(
-                if (!isItemVisible(layoutInfo, indexInVisibleItems)) calcItemHeight(
-                    ITEM_SIZE.dp, DEGREE_OF_ENDPOINT
-                )
-                else {
-                    val degree = getRotationDegree(layoutInfo, indexInVisibleItems)
-                    calcItemHeight(ITEM_SIZE.dp, degree)
-                }
+    Text(modifier = Modifier
+        .fillMaxWidth()
+        .height(
+            if (!isItemVisible(layoutInfo, indexInVisibleItems)) calcItemHeight(
+                ITEM_SIZE.dp, DEGREE_OF_ENDPOINT
             )
-            .graphicsLayer {
-                if (!isItemVisible(layoutInfo, indexInVisibleItems)) return@graphicsLayer
-                rotationX = getRotationDegree(layoutInfo, indexInVisibleItems)
-                    .toDegree()
-                    .toFloat()
+            else {
+                val degree = getRotationDegree(layoutInfo, indexInVisibleItems)
+                calcItemHeight(ITEM_SIZE.dp, degree)
             }
-            .wrapContentHeight(CenterVertically),
+        )
+        .alpha(
+            if (!isItemVisible(layoutInfo, indexInVisibleItems)) 0f
+            else {
+                val degree = getRotationDegree(layoutInfo, indexInVisibleItems)
+                toRotatingTextAlpha(degree)
+            }
+        ).graphicsLayer {
+            if (!isItemVisible(layoutInfo, indexInVisibleItems)) return@graphicsLayer
+            rotationX = getRotationDegree(layoutInfo, indexInVisibleItems)
+                .toDegree()
+                .toFloat()
+        }
+        .wrapContentHeight(CenterVertically),
         text = items[itemIndex],
         fontSize = 24.sp,
         textAlign = TextAlign.Center
     )
 }
+
+fun toRotatingTextAlpha(degree: Double) = cos(degree).pow(2).toFloat()
 
 @Composable
 fun flingBehaviorWithOnFinished(onFinished: () -> Job): FlingBehavior {
