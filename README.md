@@ -1,7 +1,13 @@
 # 🌟 iPhone-like Clock
-### Say Good-bye to TimePicker!
+### Say Good-bye to old TimePicker!
 
-<!-- <img src="https://github.com/haechan29/iPhone-like-Clock/assets/63138511/72fb0a52-5cf6-4016-9ce5-3320a0217f10"/> -->
+<img src="https://github.com/haechan29/iPhone-like-Clock/assets/63138511/7b52020b-0957-4111-9753-907909c44afe" width="400"/>
+
+</br>
+
+# iPhone-like Clock applies</br>
+✨ Rotation animation</br>
+✨ Snap after fling event</br>
 
 </br>
 
@@ -90,10 +96,10 @@ override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
 [상황] 시계의 ``height``와 아이템의 ``offset``을 이용해서 아이템이 회전한 각도를 계산하여 __아이템의 ``height``을 설정했으나, 제대로 동작하지 않음__ </br>
 [분석] 1. 처음에는 LazyColumn 내부 아이템의 ``height``이 변해서 스크롤된다고 생각했음</br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;하지만 ``로그``를 찍어 보니 LazyColumn 내부 아이템의 ``height``이 변해도 __스크롤은 변하지 않았음__ </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2. LazyColumn의 firstVisibleItemIndex가 반환하는 값이 변한다고 생각했음</br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;마찬가지로 로그를 찍어 확인해보니 LazyColumn의 첫 아이템이 10dp까지 줄어도 __``firstVisibleItemIndex``는 변하지 않았음__.</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2. LazyColumn의 ``firstVisibleItemIndex``가 반환하는 값이 변한다고 생각했음</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;마찬가지로 ``로그``를 찍어 확인해보니 LazyColumn의 첫 아이템이 __10dp__ 까지 줄어도 __``firstVisibleItemIndex``는 변하지 않았음__.</br>
 [원인] Kotlin의 삼각함수에 도(°)가 아니라 __라디안(rad)__ 단위의 숫자를 대입해야 함</br>
-[해결] __삼각함수에 대입하는 값을 라디안 단위로 변경__하여 대입함</br>
+[해결] __삼각함수에 대입하는 값을 라디안 단위로 변경__ 하여 대입함</br>
 
 </br>
 
