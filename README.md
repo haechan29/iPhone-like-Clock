@@ -1,13 +1,13 @@
 # 🌟 iPhone-like Clock
-### Say Good-bye to TimePicker.
+### Say Good-bye to TimePicker!
 
 <!-- <img src="https://github.com/haechan29/iPhone-like-Clock/assets/63138511/72fb0a52-5cf6-4016-9ce5-3320a0217f10"/> -->
 
 </br>
 
-## ⚒️ How Does It Work
+# ⚒️ How Does It Work
 1️⃣ Calculate the __rotated degree__ of the item using the ``height`` of the clock and the ``offset`` of the item
-<details>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<details>
   <summary>View code</summary>
   
   ```
@@ -102,7 +102,7 @@
 
 </br>
 
-[상황] 시계의 ``height``와 아이템의 ``offset``을 이용해서 아이템이 회전한 각도하여 아이템의 ``height``을 설정했으나, 제대로 동작하지 않음</br>
+[상황] 시계의 ``height``와 아이템의 ``offset``을 이용해서 아이템이 회전한 각도를 계산하여 __아이템의 ``height``을 설정했으나, 제대로 동작하지 않음__ </br>
 [분석] 1. 처음에는 LazyColumn 내부 아이템의 ``height``이 변해서 스크롤된다고 생각했음</br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;하지만 ``로그``를 찍어 보니 LazyColumn 내부 아이템의 ``height``이 변해도 __스크롤은 변하지 않았음__ </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2. LazyColumn의 firstVisibleItemIndex가 반환하는 값이 변한다고 생각했음</br>
@@ -116,7 +116,7 @@
 
 </br>
 
-[상황] LazyColumn 내부 아이템의 ``height``이 계속 변하다보니 __Snapper__ 가 제대로 동작하지 않음</br>
-[분석] __Android 커뮤니티__ 에 문의한 결과, FlingBehavior을 통해 Fling 관련 설정을 할 수 있다는 사실을 알게 됨</br>
-[원인] FlingBehavior의 구현체를 통해 Fling 이벤트의 종료 시점에 scrollTo() 메서드를 호출함.</br>
-[해결] 시계가 고정된 위치에 멈추게 됨.</br>
+[상황] LazyColumn 내부 아이템의 ``height``이 계속 변하다보니 __``Snapper`` 가 제대로 동작하지 않음__ </br>
+[분석] __Android 커뮤니티에 문의__ 한 결과, __``FlingBehavior``을 통해 ``Fling`` 관련 설정을 할 수 있다__ 는 사실을 알게 됨</br>
+[원인] ``FlingBehavior``의 구현체를 통해 __Fling 이벤트의 종료 시점에 scrollTo() 메서드를 호출함__.</br>
+[해결] __시계가 고정된 위치에 멈추게 됨__.</br>
