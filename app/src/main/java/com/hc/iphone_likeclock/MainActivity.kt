@@ -201,9 +201,8 @@ fun RotatingText(
     Text(modifier = Modifier
         .fillMaxWidth()
         .height(
-            if (!isItemVisible(layoutInfo, indexInVisibleItems)) calcItemHeight(
-                ITEM_SIZE.dp, DEGREE_OF_ENDPOINT
-            )
+            if (!isItemVisible(layoutInfo, indexInVisibleItems))
+                calcItemHeight(ITEM_SIZE.dp, DEGREE_OF_ENDPOINT)
             else {
                 val degree = getRotationDegree(layoutInfo, indexInVisibleItems)
                 calcItemHeight(ITEM_SIZE.dp, degree)
@@ -215,17 +214,15 @@ fun RotatingText(
                 val degree = getRotationDegree(layoutInfo, indexInVisibleItems)
                 toRotatingTextAlpha(degree)
             }
-        ).graphicsLayer {
+        )
+        .graphicsLayer {
             if (!isItemVisible(layoutInfo, indexInVisibleItems)) return@graphicsLayer
-            rotationX = getRotationDegree(layoutInfo, indexInVisibleItems)
-                .toDegree()
-                .toFloat()
+            rotationX = getRotationDegree(layoutInfo, indexInVisibleItems).toDegree().toFloat()
         }
         .wrapContentHeight(CenterVertically),
         text = items[itemIndex],
         fontSize = 24.sp,
-        textAlign = TextAlign.Center
-    )
+        textAlign = TextAlign.Center)
 }
 
 fun toRotatingTextAlpha(degree: Double) = cos(degree).pow(2).toFloat()
