@@ -6,45 +6,39 @@
 </br>
 
 # ⚒️ How Does It Work
-1️⃣ Calculate the __rotated degree__ of the item using the ``height`` of the clock and the ``offset`` of the item
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<details>
-  <summary>View code</summary>
-  
-  ```
-  fun getRotationDegree(layoutInfo: LazyListLayoutInfo, indexInVisibleItems: Int): Double {
-    val viewportHeight = with(layoutInfo) { viewportEndOffset - viewportStartOffset }
-    val itemInfo = layoutInfo.visibleItemsInfo[indexInVisibleItems]
-    val itemCenterOffset = calcItemCenterOffset(itemInfo)
-    val h = viewportHeight / 2 - itemCenterOffset
-    val r = CLOCK_RADIUS.toPx()
-    return asin(h.toDouble() / r.toDouble())
-  }
-  ```
-</details>
+## 1️⃣ Calculate the __rotated degree__ of the item
+using the ``height`` of the clock and the ``offset`` of the item
+```
+fun getRotationDegree(layoutInfo: LazyListLayoutInfo, indexInVisibleItems: Int): Double {
+  val viewportHeight = with(layoutInfo) { viewportEndOffset - viewportStartOffset }
+  val itemInfo = layoutInfo.visibleItemsInfo[indexInVisibleItems]
+  val itemCenterOffset = calcItemCenterOffset(itemInfo)
+  val h = viewportHeight / 2 - itemCenterOffset
+  val r = CLOCK_RADIUS.toPx()
+  return asin(h.toDouble() / r.toDouble())
+}
+```
 
 </br>
 
-2️⃣ Rotate the item into ``y-direction`` and decrease the ``height`` of the item by the __rotated degree__.
-<details>
-  <summary>View code</summary>
-
-  ```
-  .graphicsLayer {
-      if (!isItemVisible(layoutInfo, indexInVisibleItems)) return@graphicsLayer
-      rotationX = getRotationDegree(layoutInfo, indexInVisibleItems).toDegree().toFloat()
-  }
-  ```
-  ```
-  .height(
-      if (!isItemVisible(layoutInfo, indexInVisibleItems))
-          calcItemHeight(ITEM_SIZE.dp, DEGREE_OF_ENDPOINT)
-      else {
-          val degree = getRotationDegree(layoutInfo, indexInVisibleItems)
-          calcItemHeight(ITEM_SIZE.dp, degree)
-      }
-  )
-  ```
-</details>
+## 2️⃣ Rotate the item by the rotated degree
+increase ``rotationY`` and decrease the ``height`` of the item.
+```
+.graphicsLayer {
+    if (!isItemVisible(layoutInfo, indexInVisibleItems)) return@graphicsLayer
+    rotationX = getRotationDegree(layoutInfo, indexInVisibleItems).toDegree().toFloat()
+}
+```
+```
+.height(
+    if (!isItemVisible(layoutInfo, indexInVisibleItems))
+        calcItemHeight(ITEM_SIZE.dp, DEGREE_OF_ENDPOINT)
+    else {
+        val degree = getRotationDegree(layoutInfo, indexInVisibleItems)
+        calcItemHeight(ITEM_SIZE.dp, degree)
+    }
+)
+```
 
 </br>
 
