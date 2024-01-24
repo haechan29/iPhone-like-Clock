@@ -74,8 +74,8 @@ class MainActivity : ComponentActivity() {
         const val DEGREE_VISIBLE = PI / 3
         const val DEGREE_OF_ENDPOINT = PI / 2.6
         const val CLOCK_WIDTH = 300
-        const val CLOCK_RADIUS = 120
-        const val ITEM_SIZE = 50
+        const val CLOCK_RADIUS = 100
+        const val ITEM_SIZE = 40
     }
 }
 
@@ -114,7 +114,8 @@ fun IPhoneLikeClock() {
 @Composable
 fun BoxScope.TranslucentScreen() {
     Box(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .height((calcClockHeight() - ITEM_SIZE.dp) / 2)
             .alpha(0.05f)
             .background(color = Color.Black)
@@ -125,11 +126,10 @@ fun BoxScope.TranslucentScreen() {
             .fillMaxWidth()
             .height(ITEM_SIZE.dp)
     ) {
-        val screenWidth = LocalConfiguration.current.screenWidthDp.dp
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .width((screenWidth - CLOCK_WIDTH.dp) / 2)
+                .width((getScreenWidth().dp - CLOCK_WIDTH.dp) / 2)
                 .alpha(0.05f)
                 .background(color = Color.Black),
             contentAlignment = Alignment.CenterEnd
@@ -138,14 +138,17 @@ fun BoxScope.TranslucentScreen() {
                 modifier = Modifier
                     .padding(start = 20.dp)
                     .fillMaxSize()
-                    .background(color = Color.White, shape = RoundedCornerShape(10.dp, 0.dp, 0.dp, 10.dp))
+                    .background(
+                        color = Color.White,
+                        shape = RoundedCornerShape(10.dp, 0.dp, 0.dp, 10.dp)
+                    )
             )
         }
         Spacer(modifier = Modifier.weight(1f))
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .width((screenWidth - CLOCK_WIDTH.dp) / 2)
+                .width((getScreenWidth().dp - CLOCK_WIDTH.dp) / 2)
                 .alpha(0.05f)
                 .background(color = Color.Black),
             contentAlignment = Alignment.CenterStart
@@ -154,12 +157,16 @@ fun BoxScope.TranslucentScreen() {
                 modifier = Modifier
                     .padding(end = 20.dp)
                     .fillMaxSize()
-                    .background(color = Color.White, shape = RoundedCornerShape(0.dp, 10.dp, 10.dp, 0.dp))
+                    .background(
+                        color = Color.White,
+                        shape = RoundedCornerShape(0.dp, 10.dp, 10.dp, 0.dp)
+                    )
             )
         }
     }
     Box(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .height((calcClockHeight() - ITEM_SIZE.dp) / 2)
             .alpha(0.05f)
             .background(color = Color.Black)
@@ -234,6 +241,9 @@ fun ClockPreview() {
         IPhoneLikeClock()
     }
 }
+
+@Composable
+fun getScreenWidth() = LocalConfiguration.current.screenWidthDp
 
 private fun List<String>.addedEmptySpaces() = listOf(listOf("", ""), this, listOf("", "")).flatten()
 fun calcClockHeight() = CLOCK_RADIUS.dp * sin(DEGREE_VISIBLE).toFloat() * 2
