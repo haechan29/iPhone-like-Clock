@@ -93,23 +93,30 @@
           return velocityLeft
       }
   ```
-</detail>
+</details>
 
 </br>
 
 ## 🥄 Challenges
-1. 아이템의 높이가 제대로 설정되지 않는 문제
-[상황] 시계의 ``height``와 아이템의 ``offset``을 이용해서 아이템이 회전한 각도하여 아이템의 ``height``을 설정했으나, 제대로 동작하지 않음
-[분석] 1. 처음에는 LazyColumn 내부 아이템의 ``height``이 변해서 스크롤된다고 생각했음
-          하지만 로그를 찍어 보니 LazyColumn 내부 아이템의 ``height``이 변해도 스크롤은 변하지 않았음
-          2. LazyColumn의 firstVisibleItemIndex가 반환하는 값이 변한다고 생각했음
-          마찬가지로 로그를 찍어 확인해보니 LazyColumn의 첫 아이템이 10dp까지 줄어도 firstVisibleItemIndex는 변하지 않았음.
-[원인] Kotlin의 삼각함수에 도(°)가 아니라 라디안(rad) 단위의 숫자를 대입해야 함
-[해결] 삼각함수에 대입하는 값을 라디안 단위로 변경하여 대입함
+### 1️⃣ 아이템의 높이가 제대로 설정되지 않는 문제
 
-2. Snapper가 제대로 동작하지 않는 문제
+</br>
 
-[상황] LazyColumn 내부 아이템의 ``height``이 계속 변하다보니 Snapper가 제대로 동작하지 않음
-[분석] Android 커뮤니티에 문의한 결과, FlingBehavior을 통해 Fling 관련 설정을 할 수 있다는 사실을 알게 됨
-[원인] FlingBehavior의 구현체를 통해 Fling 이벤트의 종료 시점에 scrollTo() 메서드를 호출함.
-[해결] 시계가 고정된 위치에 멈추게 됨.
+[상황] 시계의 ``height``와 아이템의 ``offset``을 이용해서 아이템이 회전한 각도하여 아이템의 ``height``을 설정했으나, 제대로 동작하지 않음</br>
+[분석] 1. 처음에는 LazyColumn 내부 아이템의 ``height``이 변해서 스크롤된다고 생각했음</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;하지만 ``로그``를 찍어 보니 LazyColumn 내부 아이템의 ``height``이 변해도 __스크롤은 변하지 않았음__ </br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2. LazyColumn의 firstVisibleItemIndex가 반환하는 값이 변한다고 생각했음</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;마찬가지로 로그를 찍어 확인해보니 LazyColumn의 첫 아이템이 10dp까지 줄어도 __``firstVisibleItemIndex``는 변하지 않았음__.</br>
+[원인] Kotlin의 삼각함수에 도(°)가 아니라 __라디안(rad)__ 단위의 숫자를 대입해야 함</br>
+[해결] __삼각함수에 대입하는 값을 라디안 단위로 변경__하여 대입함</br>
+
+</br>
+
+### 2️⃣ Snapper가 제대로 동작하지 않는 문제
+
+</br>
+
+[상황] LazyColumn 내부 아이템의 ``height``이 계속 변하다보니 __Snapper__ 가 제대로 동작하지 않음</br>
+[분석] __Android 커뮤니티__ 에 문의한 결과, FlingBehavior을 통해 Fling 관련 설정을 할 수 있다는 사실을 알게 됨</br>
+[원인] FlingBehavior의 구현체를 통해 Fling 이벤트의 종료 시점에 scrollTo() 메서드를 호출함.</br>
+[해결] 시계가 고정된 위치에 멈추게 됨.</br>
