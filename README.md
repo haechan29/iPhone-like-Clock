@@ -22,7 +22,7 @@ fun getRotationDegree(layoutInfo: LazyListLayoutInfo, indexInVisibleItems: Int):
 </br>
 
 ## 2️⃣ Rotate the item by the rotated degree
-increase ``rotationY`` and decrease the ``height`` of the item.
+by increasing ``rotationY`` and decreasing the ``height`` of the item.
 ```
 .graphicsLayer {
     if (!isItemVisible(layoutInfo, indexInVisibleItems)) return@graphicsLayer
@@ -42,60 +42,51 @@ increase ``rotationY`` and decrease the ``height`` of the item.
 
 </br>
 
-3️⃣ Snap to a specific position whenever __fling event__ haapens using ``scrollTo()`` method
-<details>
-  <summary>View code</summary>
-  
-  ```
-  flingBehavior = flingBehaviorWithOnFinished {
-      scope.launch {
-          listState.animateScrollToItem(listState.firstItemIndex)
-      }
-  }
-  ```
-</details>
+## 3️⃣ Snap to a specific position
+whenever __fling event__ ends using ``scrollTo()`` method
+```
+flingBehavior = flingBehaviorWithOnFinished {
+    scope.launch {
+        listState.animateScrollToItem(listState.firstItemIndex)
+    }
+}
+```
 
 </br>
 
-💡 Can detect the end of __fling event__ using ``animation`` in  ``ScrollScope.performFling()`` method of FlingBehavior
-<details>
-  <summary>View code</summary>
-  
-  ```
-  override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
-          var isAnimationRunning = true
-          var velocityLeft = initialVelocity
-          var lastValue = 0f
-          val animationState = AnimationState(
-              initialValue = 0f,
-              initialVelocity = initialVelocity,
-          )
-          animationState.animateDecay(decayAnimSpec) {
-              val delta = value - lastValue
-              val consumed = scrollBy(delta)
-              lastValue = value
-              velocityLeft = this.velocity
-              if (isAnimationRunning != isRunning) {
-                  if (!isRunning) {
-                      onFinished()
-                  }
-                  isAnimationRunning = isRunning
-              }
-              // avoid rounding errors and stop if anything is unconsumed
-              if (abs(delta - consumed) > 0.5f) this.cancelAnimation()
-          }
-          return velocityLeft
-      }
-  ```
-</details>
+### 💡 Can detect the end of __fling event__
+using ``animation`` in  ``ScrollScope.performFling()`` method of FlingBehavior
+```
+override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
+        var isAnimationRunning = true
+        var velocityLeft = initialVelocity
+        var lastValue = 0f
+        val animationState = AnimationState(
+            initialValue = 0f,
+            initialVelocity = initialVelocity,
+        )
+        animationState.animateDecay(decayAnimSpec) {
+            val delta = value - lastValue
+            val consumed = scrollBy(delta)
+            lastValue = value
+            velocityLeft = this.velocity
+            if (isAnimationRunning != isRunning) {
+                if (!isRunning) {
+                    onFinished()
+                }
+                isAnimationRunning = isRunning
+            }
+            // avoid rounding errors and stop if anything is unconsumed
+            if (abs(delta - consumed) > 0.5f) this.cancelAnimation()
+        }
+        return velocityLeft
+    }
+```
 
 </br>
 
-## 🥄 Challenges
-### 1️⃣ 아이템의 높이가 제대로 설정되지 않는 문제
-
-</br>
-
+# 🥄 Challenges
+## 1️⃣ 아이템의 높이가 제대로 설정되지 않는 문제
 [상황] 시계의 ``height``와 아이템의 ``offset``을 이용해서 아이템이 회전한 각도를 계산하여 __아이템의 ``height``을 설정했으나, 제대로 동작하지 않음__ </br>
 [분석] 1. 처음에는 LazyColumn 내부 아이템의 ``height``이 변해서 스크롤된다고 생각했음</br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;하지만 ``로그``를 찍어 보니 LazyColumn 내부 아이템의 ``height``이 변해도 __스크롤은 변하지 않았음__ </br>
@@ -106,10 +97,7 @@ increase ``rotationY`` and decrease the ``height`` of the item.
 
 </br>
 
-### 2️⃣ Snapper가 제대로 동작하지 않는 문제
-
-</br>
-
+## 2️⃣ Snapper가 제대로 동작하지 않는 문제
 [상황] LazyColumn 내부 아이템의 ``height``이 계속 변하다보니 __``Snapper`` 가 제대로 동작하지 않음__ </br>
 [분석] __Android 커뮤니티에 문의__ 한 결과, __``FlingBehavior``을 통해 ``Fling`` 관련 설정을 할 수 있다__ 는 사실을 알게 됨</br>
 [원인] ``FlingBehavior``의 구현체를 통해 __Fling 이벤트의 종료 시점에 scrollTo() 메서드를 호출함__.</br>
