@@ -92,7 +92,8 @@ override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
 
 # 🥄 Challenges
 ## 1️⃣ 아이템의 높이가 제대로 설정되지 않는 문제
-[상황] 시계의 ``height``와 아이템의 ``offset``을 이용해서 아이템이 회전한 각도를 계산하여 __아이템의 ``height``을 설정했으나, 제대로 동작하지 않음__ </br>
+[상황] 시계의 ``height``와 아이템의 ``offset``을 이용해서 아이템이 회전한 각도를 계산하여 __아이템의 ``height``을 설정했으나__,</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__제대로 동작하지 않음__ </br>
 [분석] 1. 처음에는 LazyColumn 내부 아이템의 ``height``이 변해서 스크롤된다고 생각했음</br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;하지만 ``로그``를 찍어 보니 LazyColumn 내부 아이템의 ``height``이 변해도 __스크롤은 변하지 않았음__ </br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2. LazyColumn의 ``firstVisibleItemIndex``가 반환하는 값이 변한다고 생각했음</br>
