@@ -176,65 +176,20 @@ fun Clock(items: List<String>, numberOfFrontPadding:Int = 4, numberOfBackPadding
     val itemsWithPadding = items.addedPadding(numberOfFrontPadding, numberOfBackPadding)
     val listState = rememberLazyListState().apply {
         setInitialScroll(numberOfFrontPadding)
+        snapOnEnd(itemsWithPadding.size, numberOfFrontPadding, numberOfBackPadding)
     }
 
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
             .height(calcClockHeight()),
-        state = listState,
+        state = listState
     ) {
         items(itemsWithPadding.size) { itemIndex ->
             RotatingText(itemsWithPadding, itemIndex, listState)
         }
     }
-
-    listState.onScrollFinished {
-        val itemIndexClosestToTop = listState.getItemIndexClosestToTop()
-        val coercedIndex = itemIndexClosestToTop.coerceNonPadding(itemsWithPadding.size, numberOfFrontPadding, numberOfBackPadding)
-        listState.animateScrollToItem(coercedIndex)
-    }
 }
-
-private fun Int.coerceNonPadding(itemsSize: Int, numberOfFrontPadding:Int, numberOfBackPadding: Int): Int {
-    val rangeOfNonPaddingItem = numberOfFrontPadding - 2 until itemsSize - numberOfBackPadding - 2
-    return coerceIn(rangeOfNonPaddingItem)
-}
-
-@Composable
-fun LazyListState.setInitialScroll(index: Int) {
-    var initialScrollDone by remember { mutableStateOf(false) }
-
-    LaunchedEffect(initialScrollDone) {
-        if (!initialScrollDone) {
-            scrollToItem(index - 2)
-            initialScrollDone = true
-        }
-    }
-}
-
-@Composable
-private fun LazyListState.onScrollFinished(f: suspend () -> Unit) {
-    LaunchedEffect(isScrollInProgress) {
-        if (!isScrollInProgress) {
-            f()
-        }
-    }
-}
-
-private fun LazyListState.getItemIndexClosestToTop() =
-    listOf(firstVisibleItemIndex, firstVisibleItemIndex + 1)
-        .minBy { itemIndex ->
-            getItemOffsetOrNull(itemIndex) ?: Int.MAX_VALUE
-        }
-
-private fun LazyListState.getItemOffsetOrNull(itemIndex: Int) =
-    try {
-        val indexInVisibleItems = itemIndex - firstVisibleItemIndex
-        abs(layoutInfo.visibleItemsInfo[indexInVisibleItems].offset)
-    } catch (e: Exception) {
-        null
-    }
 
 @Composable
 fun RotatingText(
@@ -269,23 +224,9 @@ fun RotatingText(
         }
         .wrapContentHeight(CenterVertically),
         text = items[itemIndex],
-//        text = itemIndex.toString(),
-//        text = "$itemIndex: " + try {
-//            visibleItemsInfo[indexInVisibleItems].offset.toString()
-//        } catch (e: Exception) {
-//            "empty"
-//        },
-//        text = "$indexInVisibleItems: " + if (!isItemVisible(layoutInfo, indexInVisibleItems))
-//            calcItemHeight(ITEM_SIZE.dp, DEGREE_OF_ENDPOINT)
-//        else {
-//            val degree = getRotationDegree(layoutInfo, indexInVisibleItems)
-//            calcItemHeight(ITEM_SIZE.dp, degree)
-//        }.value.let { (it * 100f).toInt() / 100f }.toString(),
         fontSize = 24.sp,
         textAlign = TextAlign.Center)
 }
-
-fun toRotatingTextAlpha(degree: Double) = cos(degree).pow(2).toFloat()
 
 @Preview(showBackground = true)
 @Composable
@@ -293,6 +234,62 @@ fun ClockPreview() {
     IPhoneLikeClockTheme {
         IPhoneLikeClock()
     }
+}
+
+
+
+@Composable
+fun LazyListState.setInitialScroll(index: Int) {
+    var initialScrollDone by remember { mutableStateOf(false) }
+
+    LaunchedEffect(initialScrollDone) {
+        if (!initialScrollDone) {
+            scrollToItem(index - 2)
+            initialScrollDone = true
+        }
+    }
+}
+
+@Composable
+fun LazyListState.snapOnEnd(itemsSize: Int, numberOfFrontPadding:Int, numberOfBackPadding: Int) {
+    var isScrollByEngineerInProgress by remember { mutableStateOf(false) }
+
+    onScrollEnd {
+        if (!isScrollByEngineerInProgress) {
+            val itemIndexClosestToTop = getItemIndexClosestToTop()
+            val coercedIndex = itemIndexClosestToTop.coerceNonPadding(itemsSize, numberOfFrontPadding, numberOfBackPadding)
+            animateScrollToItem(coercedIndex)
+        }
+        isScrollByEngineerInProgress = !isScrollByEngineerInProgress
+    }
+}
+
+@Composable
+private fun LazyListState.onScrollEnd(f: suspend () -> Unit) {
+    LaunchedEffect(isScrollInProgress) {
+        if (!isScrollInProgress) {
+            f()
+        }
+    }
+}
+
+private fun LazyListState.getItemIndexClosestToTop() =
+    listOf(firstVisibleItemIndex, firstVisibleItemIndex + 1)
+        .minBy { itemIndex ->
+            getItemOffsetOrNull(itemIndex) ?: Int.MAX_VALUE
+        }
+
+private fun LazyListState.getItemOffsetOrNull(itemIndex: Int) =
+    try {
+        val indexInVisibleItems = itemIndex - firstVisibleItemIndex
+        abs(layoutInfo.visibleItemsInfo[indexInVisibleItems].offset)
+    } catch (e: Exception) {
+        null
+    }
+
+private fun Int.coerceNonPadding(itemsSize: Int, numberOfFrontPadding:Int, numberOfBackPadding: Int): Int {
+    val rangeOfNonPaddingItem = numberOfFrontPadding - 2 until itemsSize - numberOfBackPadding - 2
+    return coerceIn(rangeOfNonPaddingItem)
 }
 
 @Composable
@@ -318,6 +315,8 @@ fun getRotationDegree(layoutInfo: LazyListLayoutInfo, indexInVisibleItems: Int):
     val r = CLOCK_RADIUS.toPx()
     return asin(h.toDouble() / r.toDouble())
 }
+
+fun toRotatingTextAlpha(degree: Double) = cos(degree).pow(2).toFloat()
 
 fun calcItemCenterOffset(itemInfo: LazyListItemInfo) = with(itemInfo) { offset + size / 2 }
 fun Double.toRadian() = this / 180f * PI
