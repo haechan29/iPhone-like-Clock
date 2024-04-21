@@ -36,6 +36,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomCenter
 import androidx.compose.ui.Alignment.Companion.Center
@@ -57,6 +58,8 @@ import com.hc.iphone_likeclock.MainActivity.Companion.DEGREE_OF_ENDPOINT
 import com.hc.iphone_likeclock.MainActivity.Companion.DEGREE_VISIBLE
 import com.hc.iphone_likeclock.MainActivity.Companion.ITEM_SIZE
 import com.hc.iphone_likeclock.ui.theme.IPhoneLikeClockTheme
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.lang.Exception
 import kotlin.math.PI
@@ -222,8 +225,9 @@ fun LazyListState.setInitialScroll(index: Int) {
 
 @Composable
 fun Clock(items: List<String>) {
-    val listState = rememberLazyListState()
-    val scope = rememberCoroutineScope()
+    val listState = rememberLazyListState().apply {
+        this.scrollToClosest(1)
+    }
     val layoutInfo by remember { derivedStateOf { listState.layoutInfo } }
     val firstItemIndex by remember { derivedStateOf { listState.firstVisibleItemIndex } }
 
@@ -232,16 +236,21 @@ fun Clock(items: List<String>) {
             .fillMaxWidth()
             .height(calcClockHeight()),
         state = listState,
-        flingBehavior = flingBehaviorWithOnFinished {
-            scope.launch {
-                listState.animateScrollToItem(firstItemIndex)
-            }
-        }
     ) {
         items(items.size) { itemIndex ->
             RotatingText(items, itemIndex, listState, layoutInfo)
         }
     }
+
+    LaunchedEffect(listState.isScrollInProgress) {
+        if (!listState.isScrollInProgress) {
+            listState.animateScrollToItem(firstItemIndex)
+        }
+    }
+}
+
+private fun LazyListState.scrollToClosest(i: Int) {
+
 }
 
 @Composable
