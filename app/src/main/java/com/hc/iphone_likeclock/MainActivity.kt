@@ -172,11 +172,10 @@ fun BoxScope.TranslucentScreen() {
 }
 
 @Composable
-fun Clock(items: List<String>, numberOfFrontPadding:Int = 3, numberOfBackPadding: Int = 3) {
+fun Clock(items: List<String>, numberOfFrontPadding:Int = 4, numberOfBackPadding: Int = 4) {
     val itemsWithPadding = items.addedPadding(numberOfFrontPadding, numberOfBackPadding)
-
     val listState = rememberLazyListState().apply {
-        setInitialScroll(numberOfFrontPadding - 2)
+        setInitialScroll(numberOfFrontPadding)
     }
 
     LazyColumn(
@@ -198,7 +197,7 @@ fun Clock(items: List<String>, numberOfFrontPadding:Int = 3, numberOfBackPadding
 }
 
 private fun Int.coerceNonPadding(itemsSize: Int, numberOfFrontPadding:Int, numberOfBackPadding: Int): Int {
-    val rangeOfNonPaddingItem = numberOfFrontPadding until itemsSize - numberOfBackPadding
+    val rangeOfNonPaddingItem = numberOfFrontPadding - 2 until itemsSize - numberOfBackPadding - 2
     return coerceIn(rangeOfNonPaddingItem)
 }
 
@@ -208,7 +207,7 @@ fun LazyListState.setInitialScroll(index: Int) {
 
     LaunchedEffect(initialScrollDone) {
         if (!initialScrollDone) {
-            scrollToItem(index)
+            scrollToItem(index - 2)
             initialScrollDone = true
         }
     }
@@ -269,8 +268,8 @@ fun RotatingText(
                 .toFloat()
         }
         .wrapContentHeight(CenterVertically),
-//        text = items[itemIndex],
-        text = itemIndex.toString(),
+        text = items[itemIndex],
+//        text = itemIndex.toString(),
 //        text = "$itemIndex: " + try {
 //            visibleItemsInfo[indexInVisibleItems].offset.toString()
 //        } catch (e: Exception) {
@@ -299,7 +298,6 @@ fun ClockPreview() {
 @Composable
 fun getScreenWidth() = LocalConfiguration.current.screenWidthDp
 
-private fun List<String>.addedPadding() = listOf(listOf("", ""), this, listOf("", "")).flatten()
 private fun List<String>.addedPadding(numberOfFrontPadding: Int, numberOfBackPadding: Int) =
     mutableListOf<String>().apply {
         repeat(numberOfFrontPadding) { add("") }
