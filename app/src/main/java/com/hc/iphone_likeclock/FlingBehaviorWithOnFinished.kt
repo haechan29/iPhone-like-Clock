@@ -10,7 +10,7 @@ import kotlin.math.abs
 
 internal class FlingBehaviorWithOnFinished(
     private val decayAnimSpec: DecayAnimationSpec<Float>,
-    private val onFinished: () -> Job
+    private val onFinished: () -> Unit
 ) : FlingBehavior {
     override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
         var isAnimationRunning = true

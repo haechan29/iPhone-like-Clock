@@ -2,11 +2,13 @@ package com.hc.iphone_likeclock
 
 import android.content.res.Resources
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.FlingBehavior
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -27,10 +29,13 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomCenter
 import androidx.compose.ui.Alignment.Companion.Center
@@ -52,13 +57,14 @@ import com.hc.iphone_likeclock.MainActivity.Companion.DEGREE_OF_ENDPOINT
 import com.hc.iphone_likeclock.MainActivity.Companion.DEGREE_VISIBLE
 import com.hc.iphone_likeclock.MainActivity.Companion.ITEM_SIZE
 import com.hc.iphone_likeclock.ui.theme.IPhoneLikeClockTheme
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import java.lang.Exception
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.asin
 import kotlin.math.cos
 import kotlin.math.pow
+import kotlin.math.roundToInt
 import kotlin.math.sin
 
 class MainActivity : ComponentActivity() {
@@ -82,7 +88,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun IPhoneLikeClock() {
-    val periods = listOf("오전", "오후").addedEmptySpaces()
+    val periods = listOf("오전", "오후")
     val hours = (1..12).map { it.toString() }.toList().addedEmptySpaces()
     val minutes = (0..59).map { it.toString() }.toList().addedEmptySpaces()
     Box(
@@ -96,7 +102,7 @@ fun IPhoneLikeClock() {
         ) {
             Row(modifier = Modifier.width(CLOCK_WIDTH.dp)) {
                 Box(modifier = Modifier.weight(1f)) {
-                    Clock(periods)
+                    PeriodClock(periods)
                 }
                 Box(modifier = Modifier.weight(1f)) {
                     Clock(hours)
@@ -172,20 +178,66 @@ fun BoxScope.TranslucentScreen() {
 }
 
 @Composable
+fun PeriodClock(items: List<String>) {
+    val numberOfFrontEmptySpace = 4
+    val numberOfBackEmptySpace = 4
+    val itemsWithEmptySpace = items.addedEmptySpaces(numberOfFrontEmptySpace, numberOfBackEmptySpace)
+
+    val listState = rememberLazyListState().apply {
+        setInitialScroll(numberOfFrontEmptySpace - 2)
+    }
+
+    val scope = rememberCoroutineScope()
+    val layoutInfo by remember { derivedStateOf { listState.layoutInfo } }
+    val firstItemIndex by remember { derivedStateOf { listState.firstVisibleItemIndex } }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(calcClockHeight()),
+        state = listState,
+        flingBehavior = flingBehaviorWithOnFinished {
+            scope.launch {
+                listState.animateScrollToItem(firstItemIndex.coerceIn(numberOfFrontEmptySpace - 2, numberOfFrontEmptySpace - 3 + items.size))
+            }
+        }
+    ) {
+        items(itemsWithEmptySpace.size) { itemIndex ->
+            RotatingText(itemsWithEmptySpace, itemIndex, listState, layoutInfo)
+        }
+    }
+}
+
+@Composable
+fun LazyListState.setInitialScroll(index: Int) {
+    var initialScrollDone by remember { mutableStateOf(false) }
+
+    LaunchedEffect(initialScrollDone) {
+        if (!initialScrollDone) {
+            scrollToItem(index)
+            initialScrollDone = true
+        }
+    }
+}
+
+@Composable
 fun Clock(items: List<String>) {
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val layoutInfo by remember { derivedStateOf { listState.layoutInfo } }
-    val centerItemIndex by remember { derivedStateOf { getItemAtCenter(layoutInfo)?.index ?: 0 } }
-    LazyColumn(modifier = Modifier
-        .fillMaxWidth()
-        .height(calcClockHeight()),
+    val firstItemIndex by remember { derivedStateOf { listState.firstVisibleItemIndex } }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(calcClockHeight()),
         state = listState,
         flingBehavior = flingBehaviorWithOnFinished {
             scope.launch {
-                listState.animateScrollToItem(centerItemIndex - 2)
+                listState.animateScrollToItem(firstItemIndex)
             }
-        }) {
+        }
+    ) {
         items(items.size) { itemIndex ->
             RotatingText(items, itemIndex, listState, layoutInfo)
         }
@@ -198,6 +250,7 @@ fun RotatingText(
 ) {
     val firstVisibleItemIndex by remember { derivedStateOf { listState.firstVisibleItemIndex } }
     val indexInVisibleItems = itemIndex - firstVisibleItemIndex
+    val visibleItemsInfo = layoutInfo.visibleItemsInfo
     Text(modifier = Modifier
         .fillMaxWidth()
         .height(
@@ -217,10 +270,24 @@ fun RotatingText(
         )
         .graphicsLayer {
             if (!isItemVisible(layoutInfo, indexInVisibleItems)) return@graphicsLayer
-            rotationX = getRotationDegree(layoutInfo, indexInVisibleItems).toDegree().toFloat()
+            rotationX = getRotationDegree(layoutInfo, indexInVisibleItems)
+                .toDegree()
+                .toFloat()
         }
         .wrapContentHeight(CenterVertically),
         text = items[itemIndex],
+//        text = itemIndex.toString(),
+//        text = "$itemIndex: " + try {
+//            visibleItemsInfo[indexInVisibleItems].offset.toString()
+//        } catch (e: Exception) {
+//            "empty"
+//        },
+//        text = "$indexInVisibleItems: " + if (!isItemVisible(layoutInfo, indexInVisibleItems))
+//            calcItemHeight(ITEM_SIZE.dp, DEGREE_OF_ENDPOINT)
+//        else {
+//            val degree = getRotationDegree(layoutInfo, indexInVisibleItems)
+//            calcItemHeight(ITEM_SIZE.dp, degree)
+//        }.value.let { (it * 100f).toInt() / 100f }.toString(),
         fontSize = 24.sp,
         textAlign = TextAlign.Center)
 }
@@ -228,7 +295,7 @@ fun RotatingText(
 fun toRotatingTextAlpha(degree: Double) = cos(degree).pow(2).toFloat()
 
 @Composable
-fun flingBehaviorWithOnFinished(onFinished: () -> Job): FlingBehavior {
+fun flingBehaviorWithOnFinished(onFinished: () -> Unit): FlingBehavior {
     val decayAnimSpec = rememberSplineBasedDecay<Float>()
     return remember(decayAnimSpec) {
         FlingBehaviorWithOnFinished(decayAnimSpec, onFinished)
@@ -247,6 +314,13 @@ fun ClockPreview() {
 fun getScreenWidth() = LocalConfiguration.current.screenWidthDp
 
 private fun List<String>.addedEmptySpaces() = listOf(listOf("", ""), this, listOf("", "")).flatten()
+private fun List<String>.addedEmptySpaces(numberOfFrontEmptySpace: Int, numberOfBackEmptySpace: Int): List<String> {
+    val list = mutableListOf<String>()
+    repeat(numberOfFrontEmptySpace) { list.add("") }
+    list.addAll(this)
+    repeat(numberOfBackEmptySpace) { list.add("") }
+    return list
+}
 fun calcClockHeight() = CLOCK_RADIUS.dp * sin(DEGREE_VISIBLE).toFloat() * 2
 
 fun getItemAtCenter(layoutInfo: LazyListLayoutInfo): LazyListItemInfo? {
