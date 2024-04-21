@@ -225,11 +225,8 @@ fun LazyListState.setInitialScroll(index: Int) {
 
 @Composable
 fun Clock(items: List<String>) {
-    val listState = rememberLazyListState().apply {
-        this.scrollToClosest(1)
-    }
+    val listState = rememberLazyListState()
     val layoutInfo by remember { derivedStateOf { listState.layoutInfo } }
-    val firstItemIndex by remember { derivedStateOf { listState.firstVisibleItemIndex } }
 
     LazyColumn(
         modifier = Modifier
@@ -242,15 +239,31 @@ fun Clock(items: List<String>) {
         }
     }
 
-    LaunchedEffect(listState.isScrollInProgress) {
-        if (!listState.isScrollInProgress) {
-            listState.animateScrollToItem(firstItemIndex)
+    listState.onScrollFinished {
+        listState.scrollToClosest()
+    }
+}
+
+@Composable
+private fun LazyListState.onScrollFinished(f: suspend () -> Unit) {
+    LaunchedEffect(isScrollInProgress) {
+        if (!isScrollInProgress) {
+            f()
         }
     }
 }
 
-private fun LazyListState.scrollToClosest(i: Int) {
-
+private suspend fun LazyListState.scrollToClosest() {
+    val candidates = listOf(firstVisibleItemIndex, firstVisibleItemIndex + 1)
+    val target = candidates.minBy { itemIndex ->
+        try {
+            val indexInVisibleItems = itemIndex - firstVisibleItemIndex
+            abs(layoutInfo.visibleItemsInfo[indexInVisibleItems].offset)
+        } catch(e: Exception) {
+            Int.MAX_VALUE
+        }
+    }
+    animateScrollToItem(target)
 }
 
 @Composable
